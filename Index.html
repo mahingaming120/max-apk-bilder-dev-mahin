@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LINK &amp; HTML TO APK &mdash; MAX</title>
+    
+    <meta name="description" content="Turn any website or HTML project into an Android APK wrapper with MAX. Professional fullscreen WebView generation.">
+    <meta name="theme-color" content="#e4f1fc">
+    <link rel="icon" type="image/png" href="https://i.ibb.co/Wv143T0H/1000060279.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --text-primary: #0a1120;
+            --text-secondary: #334155;
+            --text-muted: #64748b;
+            --accent-blue: #007aff;
+            --accent-cyan: #00d2ff;
+            --danger: #ef4444;
+            --success: #10b981;
+
+            /* iPHONE REAL OPTICAL CRYSTAL GLASS (1px Base / 2px Floating Layers) */
+            --glass-base-bg: rgba(255, 255, 255, 0.28);
+            --glass-base-blur: blur(1px) saturate(160%);
+            --glass-card-bg: rgba(255, 255, 255, 0.45);
+            --glass-card-blur: blur(2px) saturate(175%);
+            --glass-bevel-border: 1px solid rgba(255, 255, 255, 0.65);
+            --glass-bevel-top: 1.5px solid rgba(255, 255, 255, 0.95);
+            --glass-shadow: 0 10px 25px rgba(10, 30, 60, 0.05), inset 0 1.5px 1px #ffffff, inset 0 -1px 1px rgba(0, 0, 0, 0.04);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #e4f1fc 0%, #f7eaf3 50%, #e1f7f2 100%);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.5;
+        }
+
+        .ambient-orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(40px);
+            opacity: 0.55;
+            pointer-events: none;
+            z-index: 0;
+            transform: translateZ(0);
+        }
+        .orb-1 { width: 350px; height: 350px; background: #93c5fd; top: -50px; left: -50px; }
+        .orb-2 { width: 400px; height: 400px; background: #fbcfe8; bottom: 10%; right: -100px; }
+        .orb-3 { width: 300px; height: 300px; background: #a7f3d0; top: 40%; left: 30%; }
+
+        /* 1px BLUR BASE GLASS */
+        .glass-base-panel {
+            background: var(--glass-base-bg);
+            backdrop-filter: var(--glass-base-blur);
+            -webkit-backdrop-filter: var(--glass-base-blur);
+            border: var(--glass-bevel-border);
+            border-top: var(--glass-bevel-top);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: var(--glass-shadow);
+            border-radius: 24px;
+        }
+
+        /* 2px BLUR BUTTONS & FLOATING CARDS */
+        .glass-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            background: var(--glass-card-bg);
+            border: var(--glass-bevel-border);
+            border-top: var(--glass-bevel-top);
+            border-radius: 14px;
+            padding: 10px 18px;
+            cursor: pointer;
+            backdrop-filter: var(--glass-card-blur);
+            -webkit-backdrop-filter: var(--glass-card-blur);
+            box-shadow: 0 4px 12px rgba(10, 30, 60, 0.04), inset 0 1px 1px #fff;
+            transition: transform 0.15s ease, background 0.2s ease;
+            text-decoration: none;
+        }
+        .glass-btn:active {
+            transform: scale(0.96);
+        }
+        .glass-btn-primary {
+            background: linear-gradient(135deg, rgba(0, 122, 255, 0.88), rgba(0, 85, 205, 0.95));
+            color: #ffffff;
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 24px rgba(0, 122, 255, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+        }
+
+        .pill-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 700;
+            background: var(--glass-card-bg);
+            backdrop-filter: var(--glass-card-blur);
+            -webkit-backdrop-filter: var(--glass-card-blur);
+            border: var(--glass-bevel-border);
+            border-top: var(--glass-bevel-top);
+            box-shadow: var(--glass-shadow);
+        }
+
+        .icon {
+            width: 18px;
+            height: 18px;
+            stroke-width: 2;
+            stroke: currentColor;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+        }
+
+        .site-header {
+            position: sticky;
+            top: 12px;
+            z-index: 50;
+            width: calc(100% - 24px);
+            max-width: 1200px;
+            margin: 0 auto 30px auto;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .brand-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .brand-logo-img {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+        }
+        .brand-title {
+            font-size: 16px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .dev-badge-link {
+            text-decoration: none;
+            background: linear-gradient(135deg, rgba(0, 122, 255, 0.12), rgba(0, 210, 255, 0.18));
+            border: 1px solid rgba(0, 122, 255, 0.35);
+            border-radius: 100px;
+            padding: 4px 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #0062cc;
+        }
+
+        .main-wrapper {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 16px 80px 16px;
+        }
+
+        .hero-section {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 35px auto;
+            padding: 10px;
+        }
+        .hero-title {
+            font-size: clamp(26px, 5vw, 44px);
+            font-weight: 800;
+            letter-spacing: -1.2px;
+            line-height: 1.2;
+            margin-bottom: 14px;
+            background: linear-gradient(135deg, #0a1120 20%, #007aff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .app-layout-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 32px;
+            align-items: start;
+        }
+        @media (min-width: 1024px) {
+            .app-layout-grid {
+                grid-template-columns: 1.2fr 0.8fr;
+            }
+        }
+
+        .builder-card {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+        .section-heading {
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+
+        .tabs-header {
+            display: flex;
+            background: rgba(255, 255, 255, 0.35);
+            border: var(--glass-bevel-border);
+            padding: 4px;
+            border-radius: 16px;
+            gap: 6px;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 10px 16px;
+            border-radius: 12px;
+            border: none;
+            background: transparent;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .tab-btn.active {
+            color: var(--accent-blue);
+            background: var(--glass-card-bg);
+            backdrop-filter: var(--glass-card-blur);
+            -webkit-backdrop-filter: var(--glass-card-blur);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05), inset 0 1px 1px #fff;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .form-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        .glass-input {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 14px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            background: var(--glass-card-bg);
+            backdrop-filter: var(--glass-card-blur);
+            -webkit-backdrop-filter: var(--glass-card-blur);
+            border: var(--glass-bevel-border);
+            border-top: var(--glass-bevel-top);
+            outline: none;
+        }
+        .glass-input:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
+        }
+        .input-hint {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .editor-container {
+            border-radius: 16px;
+            overflow: hidden;
+            background: #0f172a;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .code-textarea {
+            width: 100%;
+            height: 150px;
+            padding: 14px;
+            background: transparent;
+            color: #38bdf8;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            border: none;
+            outline: none;
+            resize: vertical;
+        }
+
+        .upload-card-zone {
+            border: 2px dashed rgba(0, 122, 255, 0.35);
+            border-radius: 18px;
+            padding: 18px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .logo-preview-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            width: 100%;
+            padding: 10px;
+            background: var(--glass-card-bg);
+            backdrop-filter: var(--glass-card-blur);
+            -webkit-backdrop-filter: var(--glass-card-blur);
+            border-radius: 14px;
+            border: var(--glass-bevel-border);
+        }
+        .logo-preview-thumb {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            object-fit: cover;
+        }
+
+        /* REALISTIC iPHONE MOCKUP */
+        .phone-mockup-wrapper {
+            position: sticky;
+            top: 90px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+        }
+        .mockup-container {
+            width: 300px;
+            height: 600px;
+            background: #020617;
+            border-radius: 46px;
+            padding: 10px;
+            box-shadow: 0 25px 60px -15px rgba(10, 25, 50, 0.4), 0 0 0 4px #334155;
+            position: relative;
+            overflow: hidden;
+        }
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #dbeafe 0%, #e0e7ff 40%, #fae8ff 100%);
+            border-radius: 36px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .phone-status-bar {
+            height: 26px;
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+            font-weight: 700;
+            color: #0f172a;
+            z-index: 20;
+        }
+        .phone-notch {
+            width: 65px;
+            height: 14px;
+            background: #000;
+            border-radius: 0 0 10px 10px;
+        }
+
+        .phone-home-view {
+            height: calc(100% - 26px);
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .search-widget-mockup {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 8px 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            color: #64748b;
+        }
+
+        .app-grid-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px 6px;
+            margin: auto 0;
+        }
+        .phone-app-slot {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            text-align: center;
+        }
+        .phone-app-icon-img {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+            object-fit: cover;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .phone-app-label {
+            font-size: 10px;
+            font-weight: 600;
+            color: #1e293b;
+            max-width: 55px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .user-custom-app {
+            display: none;
+        }
+        .user-custom-app .phone-app-icon-img {
+            border: 2px solid var(--accent-blue);
+            box-shadow: 0 0 14px rgba(0, 122, 255, 0.5);
+            animation: bounceInApp 0.4s ease;
+        }
+        @keyframes bounceInApp {
+            0% { transform: scale(0.6); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .phone-running-app-view {
+            position: absolute;
+            top: 26px; left: 0; right: 0; bottom: 0;
+            background: #ffffff;
+            display: none;
+            flex-direction: column;
+            z-index: 15;
+        }
+        .phone-app-nav-bar {
+            height: 38px;
+            background: #0f172a;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .phone-back-btn {
+            background: transparent;
+            border: none;
+            color: #38bdf8;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .phone-iframe-view {
+            flex: 1;
+            width: 100%;
+            border: none;
+        }
+
+        /* MODALS */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(10, 20, 40, 0.45);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .modal-card {
+            width: 100%;
+            max-width: 440px;
+            padding: 26px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .cyber-build-card {
+            background: rgba(15, 23, 42, 0.92) !important;
+            border: 1.5px solid rgba(56, 189, 248, 0.4) !important;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(56, 189, 248, 0.2) !important;
+            color: #ffffff !important;
+        }
+        .cyber-build-card h3 { color: #38bdf8; }
+        .cyber-build-card p { color: #94a3b8 !important; }
+
+        .task-row-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            background: var(--glass-card-bg);
+            backdrop-filter: var(--glass-card-blur);
+            -webkit-backdrop-filter: var(--glass-card-blur);
+            border: var(--glass-bevel-border);
+            border-radius: 14px;
+            gap: 10px;
+        }
+        .task-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-align: left;
+        }
+        .task-title { font-size: 13px; font-weight: 700; }
+        .task-sub { font-size: 11px; color: var(--text-muted); }
+
+        .toast-shelf {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 2000;
+        }
+        .toast-card {
+            min-width: 260px;
+            padding: 12px 16px;
+            border-radius: 14px;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .toast-success { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+        .toast-error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        .toast-info { background: #e0f2fe; color: #075985; border: 1px solid #bae6fd; }
+
+        .site-footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        .dev-highlight {
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-weight: 800;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
+    <div class="ambient-orb orb-3"></div>
+
+    <div class="toast-shelf" id="toastShelf"></div>
+
+    <header class="site-header glass-base-panel">
+        <div class="brand-container">
+            <img src="https://i.ibb.co/Wv143T0H/1000060279.png" alt="MAX Logo" class="brand-logo-img">
+            <span class="brand-title">
+                LINK &amp; HTML TO APK 
+                <span class="pill-badge">MAX</span>
+            </span>
+        </div>
+        <a href="https://t.me/dngrmahin" target="_blank" rel="noopener noreferrer" class="dev-badge-link" title="Telegram: MAHIN SIR">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+            <span>MAHIN SIR</span>
+        </a>
+    </header>
+
+    <main class="main-wrapper">
+        <section class="hero-section">
+            <div class="pill-badge" style="margin-bottom: 12px;">
+                <svg class="icon" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                <span>HIGH SPEED ANDROID COMPILER</span>
+            </div>
+            <h1 class="hero-title">Turn Any Website or HTML into an Android APK in Seconds</h1>
+        </section>
+
+        <div class="app-layout-grid">
+            <!-- BUILDER FORM (1px BASE GLASS) -->
+            <div class="glass-base-panel builder-card">
+                <div>
+                    <div class="section-heading">
+                        <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                        <span>Source Type</span>
+                    </div>
+                    <div class="tabs-header">
+                        <button type="button" class="tab-btn active" id="tabUrlBtn" onclick="switchSourceMode('url')">
+                            <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                            <span>Website URL</span>
+                        </button>
+                        <button type="button" class="tab-btn" id="tabHtmlBtn" onclick="switchSourceMode('html')">
+                            <svg class="icon" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                            <span>HTML Code</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="urlInputContainer" class="form-group">
+                    <label class="form-label" for="websiteUrl">Target Website URL</label>
+                    <input type="url" id="websiteUrl" class="glass-input" placeholder="https://example.com" value="">
+                </div>
+
+                <div id="htmlInputContainer" class="form-group" style="display: none;">
+                    <label class="form-label" for="htmlCode">Custom HTML5 / CSS / JS Source</label>
+                    <div class="editor-container">
+                        <textarea id="htmlCode" class="code-textarea" spellcheck="false" placeholder="Paste your HTML code here..."></textarea>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="section-heading">
+                        <svg class="icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        <span>App Information</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 14px;">
+                        <div class="form-group">
+                            <label class="form-label" for="appName">Application Name</label>
+                            <input type="text" id="appName" class="glass-input" placeholder="Type app name here (e.g. My Shop)" value="">
+                        </div>
+                        <div class="form-group">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <label class="form-label" for="packageName">Package Identifier</label>
+                                <button type="button" onclick="syncPackageWithName()" class="glass-btn" style="padding: 2px 8px; font-size: 11px;">
+                                    Auto Sync
+                                </button>
+                            </div>
+                            <input type="text" id="packageName" class="glass-input" placeholder="com.app.myshop" value="">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="section-heading">
+                        <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        <span>App Icon / Logo</span>
+                    </div>
+                    <div class="upload-card-zone" id="uploadZone">
+                        <svg class="icon" style="width: 30px; height: 30px; color: var(--accent-blue);" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        <p style="font-size: 13px; font-weight: 700;">Click to upload logo</p>
+                        <input type="file" id="iconFileInput" accept="image/*" style="display: none;">
+                    </div>
+                    <div id="iconPreviewRow" class="logo-preview-row" style="display: none; margin-top: 10px;">
+                        <img id="iconPreviewImg" src="" alt="Icon" class="logo-preview-thumb">
+                        <div style="flex: 1;">
+                            <p id="iconFileName" style="font-size: 13px; font-weight: 700;">icon.png</p>
+                        </div>
+                        <button type="button" class="glass-btn" style="padding: 4px 10px; color: var(--danger);" onclick="removeAppIcon()">Remove</button>
+                    </div>
+                </div>
+
+                <!-- VERIFY TRIGGER BUTTON (2px BLUR) -->
+                <div style="margin-top: 10px;">
+                    <button type="button" class="glass-btn glass-btn-primary" style="width: 100%; padding: 16px; font-size: 16px;" onclick="openVerificationModal()">
+                        <svg class="icon" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                        <span>VERIFY TO APK</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- INTERACTIVE PHONE MOCKUP -->
+            <div class="phone-mockup-wrapper">
+                <div class="mockup-container">
+                    <div class="phone-screen">
+                        <div class="phone-status-bar">
+                            <span id="phoneClockTime">12:00</span>
+                            <div class="phone-notch"></div>
+                            <svg style="width: 12px; height: 12px; fill: currentColor;" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L12 22l7.03-4.39C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9z"/></svg>
+                        </div>
+
+                        <!-- HOME SCREEN -->
+                        <div class="phone-home-view" id="phoneHomeView">
+                            <div class="search-widget-mockup">
+                                <svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                                <span>Search web or apps...</span>
+                            </div>
+
+                            <!-- PHONE DEFAULT APPS -->
+                            <div class="app-grid-container">
+                                <div class="phone-app-slot" onclick="showToast('Phone Dialer App', 'info')">
+                                    <div class="phone-app-icon-img" style="background: #22c55e; color: #fff;">
+                                        <svg class="icon" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                                    </div>
+                                    <span class="phone-app-label">Phone</span>
+                                </div>
+                                <div class="phone-app-slot" onclick="showToast('Messages App', 'info')">
+                                    <div class="phone-app-icon-img" style="background: #3b82f6; color: #fff;">
+                                        <svg class="icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                                    </div>
+                                    <span class="phone-app-label">Messages</span>
+                                </div>
+                                <div class="phone-app-slot" onclick="showToast('Chrome Browser', 'info')">
+                                    <div class="phone-app-icon-img" style="background: #eab308; color: #fff;">
+                                        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="21.17" y1="8" x2="12" y2="8"/><line x1="3.95" y1="6.06" x2="8.54" y2="14"/><line x1="10.88" y1="21.94" x2="15.46" y2="14"/></svg>
+                                    </div>
+                                    <span class="phone-app-label">Chrome</span>
+                                </div>
+                                <div class="phone-app-slot" onclick="showToast('Camera App', 'info')">
+                                    <div class="phone-app-icon-img" style="background: #ef4444; color: #fff;">
+                                        <svg class="icon" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                                    </div>
+                                    <span class="phone-app-label">Camera</span>
+                                </div>
+                                <div class="phone-app-slot" onclick="showToast('Gallery', 'info')">
+                                    <div class="phone-app-icon-img" style="background: #8b5cf6; color: #fff;">
+                                        <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                                    </div>
+                                    <span class="phone-app-label">Gallery</span>
+                                </div>
+                                <div class="phone-app-slot" onclick="showToast('System Settings', 'info')">
+                                    <div class="phone-app-icon-img" style="background: #0ea5e9; color: #fff;">
+                                        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                                    </div>
+                                    <span class="phone-app-label">Settings</span>
+                                </div>
+
+                                <!-- USER CUSTOM APP (DYNMIC APPEARANCE) -->
+                                <div class="phone-app-slot user-custom-app" id="userAppSlot" onclick="openInsidePhoneMockup()">
+                                    <img src="https://i.ibb.co/Wv143T0H/1000060279.png" alt="Icon" class="phone-app-icon-img" id="mockupAppIcon">
+                                    <span class="phone-app-label" id="mockupAppName" style="color: var(--accent-blue); font-weight: 800;">My App</span>
+                                </div>
+                            </div>
+
+                            <p style="font-size: 10px; color: #64748b; text-align: center;" id="phoneInstructionText">Fill App Name above to view app on phone</p>
+                        </div>
+
+                        <!-- LIVE RUNNING APP VIEW -->
+                        <div class="phone-running-app-view" id="phoneRunningAppView">
+                            <div class="phone-app-nav-bar">
+                                <button type="button" class="phone-back-btn" onclick="closeInsidePhoneMockup()">
+                                    <svg class="icon" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+                                    <span>Back</span>
+                                </button>
+                                <span id="runningAppTitle">My App</span>
+                                <span style="width: 30px;"></span>
+                            </div>
+                            <iframe id="mockupIframe" class="phone-iframe-view" sandbox="allow-scripts allow-same-origin"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- VERIFICATION MODAL -->
+    <div class="modal-overlay" id="verificationModal">
+        <div class="glass-base-panel modal-card">
+            <div>
+                <h3 style="font-size: 20px; font-weight: 800;">Task Verification</h3>
+                <p style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Complete the following tasks to unlock APK generation:</p>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <!-- Task 1 -->
+                <div class="task-row-card">
+                    <div class="task-left">
+                        <svg class="icon" style="color: #0088cc;" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                        <div>
+                            <p class="task-title">Telegram Channel</p>
+                            <p class="task-sub">Join @dngrmahin</p>
+                        </div>
+                    </div>
+                    <button type="button" class="glass-btn" id="taskBtn_tg" style="padding: 6px 12px; font-size: 12px;" onclick="verifyTask('tg', 'https://t.me/dngrmahin')">
+                        Join
+                    </button>
+                </div>
+
+                <!-- Task 2 -->
+                <div class="task-row-card">
+                    <div class="task-left">
+                        <svg class="icon" style="color: #000;" viewBox="0 0 24 24"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg>
+                        <div>
+                            <p class="task-title">TikTok Profile 1</p>
+                            <p class="task-sub">Follow @dngr_mahin_sir</p>
+                        </div>
+                    </div>
+                    <button type="button" class="glass-btn" id="taskBtn_tt1" style="padding: 6px 12px; font-size: 12px;" onclick="verifyTask('tt1', 'https://www.tiktok.com/@dngr_mahin_sir?_r=1&_t=ZS-9ADQLSyPPb3')">
+                        Follow
+                    </button>
+                </div>
+
+                <!-- Task 3 -->
+                <div class="task-row-card">
+                    <div class="task-left">
+                        <svg class="icon" style="color: #000;" viewBox="0 0 24 24"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg>
+                        <div>
+                            <p class="task-title">TikTok Profile 2</p>
+                            <p class="task-sub">Follow @max_app_and_web</p>
+                        </div>
+                    </div>
+                    <button type="button" class="glass-btn" id="taskBtn_tt2" style="padding: 6px 12px; font-size: 12px;" onclick="verifyTask('tt2', 'https://www.tiktok.com/@max_app_and_web?_r=1&_t=ZS-9ADR0zxQSST')">
+                        Follow
+                    </button>
+                </div>
+
+                <!-- Task 4 -->
+                <div class="task-row-card">
+                    <div class="task-left">
+                        <svg class="icon" style="color: #ef4444;" viewBox="0 0 24 24"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></svg>
+                        <div>
+                            <p class="task-title">YouTube Channel</p>
+                            <p class="task-sub">Subscribe @max_app_and_web</p>
+                        </div>
+                    </div>
+                    <button type="button" class="glass-btn" id="taskBtn_yt" style="padding: 6px 12px; font-size: 12px;" onclick="verifyTask('yt', 'https://youtube.com/@max_app_and_web?si=SHKdPiJKXSTAIwjX')">
+                        Subscribe
+                    </button>
+                </div>
+            </div>
+
+            <!-- UNLOCKED CTA BUTTON -->
+            <button type="button" id="unlockedGenerateBtn" class="glass-btn glass-btn-primary" style="padding: 14px; opacity: 0.5; pointer-events: none;" onclick="triggerActualBuild()">
+                <svg class="icon" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                <span>GENERATE APK</span>
+            </button>
+            <button type="button" class="glass-btn" style="padding: 8px; font-size: 12px;" onclick="closeVerificationModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- CYBER-GLASS PROGRESS MODAL -->
+    <div class="modal-overlay" id="buildModal">
+        <div class="glass-base-panel modal-card cyber-build-card">
+            <div>
+                <h3>Compiling Android Package</h3>
+                <p id="buildModalStatusDesc" style="font-size: 12px; margin-top: 4px;">Injecting resources &amp; initializing compilation...</p>
+            </div>
+
+            <div style="width: 100%; height: 10px; border-radius: 100px; overflow: hidden; background: rgba(255, 255, 255, 0.1);">
+                <div id="buildProgressFill" style="height: 100%; width: 0%; transition: width 0.3s ease; background: linear-gradient(90deg, #00d2ff, #3b82f6); box-shadow: 0 0 12px #00d2ff;"></div>
+            </div>
+            <div style="font-size: 14px; font-weight: 800; color: #38bdf8; text-align: right;" id="progressPercentageText">0%</div>
+
+            <p style="font-size: 11px; color: #94a3b8;">Signing and aligning APK with Android Keystore...</p>
+        </div>
+    </div>
+
+    <!-- SUCCESS MODAL -->
+    <div class="modal-overlay" id="successModal">
+        <div class="glass-base-panel modal-card">
+            <div style="width: 50px; height: 50px; border-radius: 50%; background: #d1fae5; color: #059669; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                <svg class="icon" style="width: 26px; height: 26px;" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div>
+                <h3 style="font-size: 22px; font-weight: 800;">APK Ready!</h3>
+                <p style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Your Android app is fully built and ready to install.</p>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <a id="downloadApkBtn" href="#" class="glass-btn glass-btn-primary" style="padding: 14px; text-decoration: none;">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    <span>Download APK</span>
+                </a>
+                <button type="button" class="glass-btn" onclick="closeSuccessModal()">Back to Builder</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <p>&copy; 2026 MAX &mdash; DEBELOPER <a href="https://t.me/dngrmahin" target="_blank" rel="noopener noreferrer" class="dev-highlight">MAHIN SIR</a></p>
+    </footer>
+
+    <script>
+        const APK_BUILDER_API = "https://apk-bilder.onrender.com/build";
+
+        const state = {
+            sourceType: "url",
+            websiteUrl: "",
+            htmlCode: "",
+            appName: "",
+            packageName: "",
+            uploadedIconBlob: null,
+            uploadedIconUrl: "https://i.ibb.co/Wv143T0H/1000060279.png",
+            isPackageManuallyEdited: false
+        };
+
+        let verifiedTasks = { tg: false, tt1: false, tt2: false, yt: false };
+        try {
+            const saved = localStorage.getItem("max_apk_tasks");
+            if (saved) verifiedTasks = JSON.parse(saved);
+        } catch (_) {}
+
+        document.addEventListener("DOMContentLoaded", () => {
+            updatePhoneClock();
+            setInterval(updatePhoneClock, 1000);
+            restoreTaskUI();
+        });
+
+        /*
+        ==================================================
+        PACKAGE NAME & LIVE PHONE MOCKUP SYNC
+        ==================================================
+        */
+        function generateCleanPackage(name) {
+            const sanitized = name.toLowerCase().replace(/[^a-z0-9]/g, "");
+            return `com.app.${sanitized || "myapp"}`;
+        }
+
+        document.getElementById("appName").addEventListener("input", (e) => {
+            state.appName = e.target.value.trim();
+            const userAppSlot = document.getElementById("userAppSlot");
+            const instruction = document.getElementById("phoneInstructionText");
+
+            if (state.appName.length > 0) {
+                userAppSlot.style.display = "flex";
+                document.getElementById("mockupAppName").textContent = state.appName;
+                document.getElementById("runningAppTitle").textContent = state.appName;
+                instruction.textContent = "Tap your app to launch inside phone";
+            } else {
+                userAppSlot.style.display = "none";
+                instruction.textContent = "Fill App Name above to view app on phone";
+            }
+
+            if (!state.isPackageManuallyEdited) {
+                state.packageName = generateCleanPackage(state.appName);
+                document.getElementById("packageName").value = state.packageName;
+            }
+        });
+
+        document.getElementById("packageName").addEventListener("input", (e) => {
+            state.isPackageManuallyEdited = true;
+            state.packageName = e.target.value.trim();
+        });
+
+        function syncPackageWithName() {
+            state.isPackageManuallyEdited = false;
+            state.packageName = generateCleanPackage(state.appName);
+            document.getElementById("packageName").value = state.packageName;
+            showToast("Package name synced with App Name", "info");
+        }
+
+        function switchSourceMode(mode) {
+            state.sourceType = mode;
+            if (mode === "url") {
+                document.getElementById("tabUrlBtn").classList.add("active");
+                document.getElementById("tabHtmlBtn").classList.remove("active");
+                document.getElementById("urlInputContainer").style.display = "flex";
+                document.getElementById("htmlInputContainer").style.display = "none";
+            } else {
+                document.getElementById("tabHtmlBtn").classList.add("active");
+                document.getElementById("tabUrlBtn").classList.remove("active");
+                document.getElementById("urlInputContainer").style.display = "none";
+                document.getElementById("htmlInputContainer").style.display = "flex";
+            }
+        }
+
+        /*
+        ==================================================
+        APP ICON UPLOAD
+        ==================================================
+        */
+        const uploadZone = document.getElementById("uploadZone");
+        const iconFileInput = document.getElementById("iconFileInput");
+
+        uploadZone.addEventListener("click", () => iconFileInput.click());
+        iconFileInput.addEventListener("change", (e) => {
+            if (e.target.files && e.target.files[0]) {
+                const file = e.target.files[0];
+                state.uploadedIconBlob = file;
+                const url = URL.createObjectURL(file);
+                state.uploadedIconUrl = url;
+
+                document.getElementById("mockupAppIcon").src = url;
+                document.getElementById("iconPreviewImg").src = url;
+                document.getElementById("iconFileName").textContent = file.name;
+                document.getElementById("iconPreviewRow").style.display = "flex";
+                showToast("App Logo updated!", "success");
+            }
+        });
+
+        function removeAppIcon() {
+            state.uploadedIconBlob = null;
+            state.uploadedIconUrl = "https://i.ibb.co/Wv143T0H/1000060279.png";
+            document.getElementById("mockupAppIcon").src = state.uploadedIconUrl;
+            document.getElementById("iconPreviewRow").style.display = "none";
+            iconFileInput.value = "";
+        }
+
+        /*
+        ==================================================
+        PHONE MOCKUP RUNNER
+        ==================================================
+        */
+        function updatePhoneClock() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+            document.getElementById("phoneClockTime").textContent = timeStr;
+        }
+
+        function openInsidePhoneMockup() {
+            const iframe = document.getElementById("mockupIframe");
+            const urlInput = document.getElementById("websiteUrl").value.trim();
+            const htmlInput = document.getElementById("htmlCode").value.trim();
+
+            if (state.sourceType === "url") {
+                if (!urlInput) {
+                    showToast("Please enter a Website URL first!", "info");
+                    return;
+                }
+                iframe.src = urlInput;
+            } else {
+                if (!htmlInput) {
+                    showToast("Please paste HTML code first!", "info");
+                    return;
+                }
+                iframe.srcdoc = htmlInput;
+            }
+            document.getElementById("runningAppTitle").textContent = state.appName || "My App";
+            document.getElementById("phoneRunningAppView").style.display = "flex";
+        }
+
+        function closeInsidePhoneMockup() {
+            const iframe = document.getElementById("mockupIframe");
+            iframe.src = "about:blank";
+            document.getElementById("phoneRunningAppView").style.display = "none";
+        }
+
+        /*
+        ==================================================
+        VERIFICATION TASK ENGINE
+        ==================================================
+        */
+        function openVerificationModal() {
+            if (!document.getElementById("appName").value.trim()) {
+                showToast("Please enter Application Name first!", "error");
+                return;
+            }
+            if (state.sourceType === "url" && !document.getElementById("websiteUrl").value.trim()) {
+                showToast("Please enter Website URL first!", "error");
+                return;
+            }
+            if (state.sourceType === "html" && !document.getElementById("htmlCode").value.trim()) {
+                showToast("Please enter HTML code first!", "error");
+                return;
+            }
+
+            document.getElementById("verificationModal").style.display = "flex";
+            restoreTaskUI();
+        }
+
+        function closeVerificationModal() {
+            document.getElementById("verificationModal").style.display = "none";
+        }
+
+        function verifyTask(taskId, targetUrl) {
+            window.open(targetUrl, "_blank");
+            verifiedTasks[taskId] = true;
+            try {
+                localStorage.setItem("max_apk_tasks", JSON.stringify(verifiedTasks));
+            } catch (_) {}
+            
+            markTaskButtonDone(taskId);
+            checkAllTasksComplete();
+        }
+
+        function markTaskButtonDone(taskId) {
+            const btn = document.getElementById(`taskBtn_${taskId}`);
+            if (btn) {
+                btn.textContent = "Done";
+                btn.style.background = "#d1fae5";
+                btn.style.color = "#059669";
+                btn.style.borderColor = "#a7f3d0";
+            }
+        }
+
+        function restoreTaskUI() {
+            for (const [task, done] of Object.entries(verifiedTasks)) {
+                if (done) markTaskButtonDone(task);
+            }
+            checkAllTasksComplete();
+        }
+
+        function checkAllTasksComplete() {
+            const complete = verifiedTasks.tg && verifiedTasks.tt1 && verifiedTasks.tt2 && verifiedTasks.yt;
+            const btn = document.getElementById("unlockedGenerateBtn");
+            if (complete && btn) {
+                btn.style.opacity = "1";
+                btn.style.pointerEvents = "auto";
+                btn.style.boxShadow = "0 8px 24px rgba(0, 122, 255, 0.4)";
+            }
+        }
+
+        /*
+        ==================================================
+        BUILD ENGINE
+        ==================================================
+        */
+        function triggerActualBuild() {
+            closeVerificationModal();
+            startBuildProcess();
+        }
+
+        async function startBuildProcess() {
+            const buildModal = document.getElementById("buildModal");
+            const fill = document.getElementById("buildProgressFill");
+            const pctText = document.getElementById("progressPercentageText");
+            const desc = document.getElementById("buildModalStatusDesc");
+
+            buildModal.style.display = "flex";
+            fill.style.width = "0%";
+            pctText.textContent = "0%";
+
+            let currentPct = 5;
+            let buildFinished = false;
+
+            const progressInterval = setInterval(() => {
+                if (buildFinished) return;
+                if (currentPct < 85) {
+                    currentPct += Math.floor(Math.random() * 5) + 3;
+                    if (currentPct > 85) currentPct = 85;
+                } else if (currentPct < 93) {
+                    currentPct += 1;
+                }
+
+                fill.style.width = `${currentPct}%`;
+                pctText.textContent = `${currentPct}%`;
+
+                if (currentPct < 30) desc.textContent = "Resizing application icons...";
+                else if (currentPct < 60) desc.textContent = "Injecting fullscreen WebView...";
+                else if (currentPct < 85) desc.textContent = "Compiling DEX bytecode...";
+                else desc.textContent = "Signing APK with Android Keystore...";
+            }, 600);
+
+            try {
+                const formData = new FormData();
+                formData.append("app_name", state.appName || "My App");
+                formData.append("package_name", state.packageName || "com.app.myapp");
+                formData.append("mode", state.sourceType);
+                formData.append("target_url", document.getElementById("websiteUrl").value.trim());
+                formData.append("html_code", document.getElementById("htmlCode").value.trim());
+
+                if (state.uploadedIconBlob) {
+                    formData.append("logo", state.uploadedIconBlob, "icon.png");
+                } else {
+                    const resp = await fetch("https://i.ibb.co/Wv143T0H/1000060279.png");
+                    const blob = await resp.blob();
+                    formData.append("logo", blob, "default_icon.png");
+                }
+
+                const res = await fetch(APK_BUILDER_API, {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (!res.ok) {
+                    let err = "Build failed on server.";
+                    try {
+                        const errJson = await res.json();
+                        err = errJson.detail || err;
+                    } catch (_) {}
+                    throw new Error(err);
+                }
+
+                const apkBlob = await res.blob();
+                
+                buildFinished = true;
+                clearInterval(progressInterval);
+                fill.style.width = "100%";
+                pctText.textContent = "100%";
+                desc.textContent = "APK Built & Verified Successfully!";
+
+                await new Promise(r => setTimeout(r, 400));
+                buildModal.style.display = "none";
+
+                const downloadUrl = URL.createObjectURL(apkBlob);
+                const safeName = (state.appName || "app").replace(/[^a-zA-Z0-9_-]/g, "_");
+                const dlBtn = document.getElementById("downloadApkBtn");
+                dlBtn.href = downloadUrl;
+                dlBtn.download = `${safeName}.apk`;
+
+                document.getElementById("successModal").style.display = "flex";
+            } catch (err) {
+                buildFinished = true;
+                clearInterval(progressInterval);
+                buildModal.style.display = "none";
+                showToast(`Build Error: ${err.message}`, "error");
+            }
+        }
+
+        function closeSuccessModal() {
+            document.getElementById("successModal").style.display = "none";
+        }
+
+        function showToast(msg, type = "info") {
+            const shelf = document.getElementById("toastShelf");
+            const toast = document.createElement("div");
+            toast.className = `toast-card toast-${type}`;
+            toast.textContent = msg;
+            shelf.appendChild(toast);
+            setTimeout(() => toast.remove(), 3500);
+        }
+    </script>
+</body>
+              </html>
